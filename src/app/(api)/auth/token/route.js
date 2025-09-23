@@ -4,7 +4,7 @@ import { query } from "@/dbh";
 import crypto from "crypto";
 import { getClientIp } from "@/server-actions/getClientIp";
 
-function hashValue(value) {
+export function hashValue(value) {
     return crypto.createHash('sha256').update(value).digest('hex');
 }
 
@@ -30,12 +30,13 @@ export async function POST(request) {
         }        
 
     } catch (error) {
-        return NextResponse.json({ success: false, error, message: "Server error please try again later" }, { status: 500 } );
+        console.log(error)
+        return NextResponse.json({ success: false, message: "Server error please try again later" }, { status: 500 } );
     }
 
 
     const formData = await request.formData();
-    const video_input = formData.get('video_input');
+    const video_input = formData.get('input_type');
     const video_file = formData.get('video_file') || null;
 
     // Clarified logic:
@@ -46,10 +47,10 @@ export async function POST(request) {
     if (!video_input || (video_input !== 'camera' && video_input !== 'file' && video_input !== 'stream')) {
         return NextResponse.json({ success: false, message: "Invalid video input type" }, { status: 400 });
     }
-    if ((video_input === 'file' || video_input === 'stream') && !video_file) {
+    if (video_input === 'file' && !video_file) {
         return NextResponse.json({ success: false, message: "Video is required for file or stream inputs" }, { status: 400 });
     }
-    if (video_input === 'camera' && video_file) {
+    if ((video_input === 'camera' || video_input === "stream") && video_file) {
         return NextResponse.json({ success: false, message: "Video file should not be provided for camera input" }, { status: 400 });
     }
 
@@ -81,11 +82,11 @@ export async function POST(request) {
             if (uploadResult.status) {
                 video_url = uploadResult.data.file.url.full;
             } else {
-                return NextResponse.json({ success: false, message: "Error uploading video file", error: uploadResult.error }, { status: 500 });
+                return NextResponse.json({ success: false, message: "Error uploading video file",}, { status: 500 });
             }
             
         } catch (error) {
-            return NextResponse.json({ success: false, message: "Error uploading video file", error }, { status: 500 });
+            return NextResponse.json({ success: false, message: "Error uploading video file", }, { status: 500 });
         }
     }
 
@@ -97,6 +98,7 @@ export async function POST(request) {
         return NextResponse.json({ success: true, token, message: "Token created successfully. This token is valid for 30 minutes" }, { status: 200 } );
         
     } catch (error) {
-        return NextResponse.json({ success: false, error, message: "Server error please try again later" }, { status: 500 } );
+        console.log(error)
+        return NextResponse.json({ success: false, message: "Server error please try again later" }, { status: 500 } );
     }
 }
