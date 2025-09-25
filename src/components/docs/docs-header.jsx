@@ -33,7 +33,7 @@ export default function DocsHeader() {
 
     return (
         <nav className="w-full h-14 sticky top-0 z-50 lg:px-4 backdrop-filter backdrop-blur-xl bg-opacity-5 border-b">
-            <div className="sm:container h-full max-sm:px-3 flex items-center justify-between ">
+            <div className="sm:container h-full max-sm:px-3 flex items-center justify-between mx-auto">
                 <div className="flex items-center gap-9">
                     <Logo />
                     <div className="lg:flex hidden items-center gap-5 text-sm font-medium text-black dark:text-muted-foreground">

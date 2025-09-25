@@ -4,15 +4,27 @@ import { useRef, useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
-import TrafficSDK from "smart-traffic-analyzer";
+import TrafficSDK from "smart-traffic-analyzer"
 
 export default function VideoStream() {
     const [streaming, setStreaming] = useState(false);
+    const [sdk, setSdk] = useState(null);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const cameraBtn = useRef(null);
     const webcamBtn = useRef(null);
-    const [videoInput, setVideoInput] = useState(null);
+    const [videoInput, setVideoInput] = useState("");
+
+    useEffect(() => {
+        const initSDK = async () => {
+            const sdkInstance = new TrafficSDK();
+            await sdkInstance.init();
+            setSdk(sdkInstance);
+            console.log("SDK initialized")
+        }
+
+        initSDK();
+    }, [])
 
     return (
         <div className="px-2">
