@@ -92,25 +92,25 @@ export default function VideoStream() {
 
   const sendFrameToBackend = async (imageData) => {
     setLoading(true)
-      const blob = await (await fetch(imageData)).blob();
-      const formData = new FormData();
-      formData.append("file", blob, "frame.jpg");
+    const blob = await (await fetch(imageData)).blob();
+    const formData = new FormData();
+    formData.append("file", blob, "frame.jpg");
 
-      try {
-        const res = await fetch(BACKEND_URL, {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json();
-        setAnalysisResult(data);
-        drawOverlay(data);
-      } catch (err) {
-        console.error("Backend error:", err);
-        setAnalysisResult({ error: "Failed to analyze frame" });
-          clearOverlay();
-      }
-      setLoading(false)
-};
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      setAnalysisResult(data);
+      drawOverlay(data);
+    } catch (err) {
+      console.error("Backend error:", err);
+      setAnalysisResult({ error: "Failed to analyze frame" });
+      clearOverlay();
+    }
+    setLoading(false)
+  };
 
 
   // Capture frame from <video> (used for both camera and webcam)
@@ -242,59 +242,4 @@ export default function VideoStream() {
         )}
       </div>
     </div>
-  );
-}
-            {webcamActive ? "Stop Webcam" : "Use Webcam"}
-          </Button>
-        </div>
-
-        {/* Video or webcam */}
-        <div className="relative w-[640px] h-[480px] mx-auto">
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            style={{ display: streaming && !webcamActive ? "block" : "none" }}
-            className="w-full h-full rounded-md"
-          />
-          <Webcam
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            style={{ display: webcamActive ? "block" : "none" }}
-            className="w-full h-full rounded-md"
-            width={640}
-            height={480}
-          />
-          {/* Overlay */}
-          <canvas
-            ref={overlayRef}
-            width={640}
-            height={480}
-            className="absolute top-0 left-0 w-full h-full pointer-events-none"
-          />
-        </div>
-
-        {/* Hidden canvas for frame capture */}
-        <canvas
-          ref={canvasRef}
-          width={640}
-          height={480}
-          style={{ display: "none" }}
-        />
-
-        {/* Loading + Results */}
-        {loading && <div className="text-center mt-2">Analyzing...</div>}
-        {analysisResult && !analysisResult.error && (
-          <div className="text-center mt-2 text-sm">
-            Vehicles detected: {analysisResult.detections?.length || 0}
-          </div>
-        )}
-        {analysisResult?.error && (
-          <div className="text-center mt-2 text-red-500">
-            {analysisResult.error}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+  )}
