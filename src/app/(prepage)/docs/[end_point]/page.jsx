@@ -1,6 +1,6 @@
-import { Typography } from "@/components/root/topography";
+// import { Typography } from "@/components/root/topography";
 import { query } from "@/dbh";
-import Toc from "@/components/root/toc";
+// import Toc from "@/components/root/toc";
 import { redirect } from "next/navigation";
 
 async function get_interview_question(interviewQuestion) {
