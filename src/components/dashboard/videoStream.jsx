@@ -3,7 +3,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import Webcam from "react-webcam";
 
 // Fix: Read env variable directly and fallback if not set
 const BACKEND_URL =
@@ -16,7 +15,6 @@ export default function VideoStream() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const overlayRef = useRef(null);
-  const webcamRef = useRef(null);
 
   const [streaming, setStreaming] = useState(false);
   const [videoInput, setVideoInput] = useState(null);
@@ -42,8 +40,8 @@ export default function VideoStream() {
     }
   }, [videoInput]);
 
-  // Camera handling
-  const startCamera = async () => {
+  // Camera/Webcam handling (merged)
+  const startCameraOrWebcam = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
@@ -52,37 +50,23 @@ export default function VideoStream() {
       }
       setMediaStream(stream);
       setStreaming(true);
-      setCameraActive(true);
-      setWebcamActive(false);
+      setCameraActive(false);
+      setWebcamActive(true);
       setVideoInput(null);
       clearOverlay();
     } catch (err) {
-      console.error("Error accessing camera:", err);
+      console.error("Error accessing camera/webcam:", err);
     }
   };
 
-  const stopCamera = () => {
+  const stopCameraOrWebcam = () => {
     if (mediaStream) {
       mediaStream.getTracks().forEach(track => track.stop());
       setMediaStream(null);
     }
     setStreaming(false);
-    setCameraActive(false);
-    clearOverlay();
-  };
-
-  // Webcam handling
-  const startWebcam = () => {
-    setWebcamActive(true);
-    setCameraActive(false);
-    setStreaming(true);
-    setVideoInput(null);
-    clearOverlay();
-  };
-
-  const stopWebcam = () => {
     setWebcamActive(false);
-    setStreaming(false);
+    setCameraActive(false);
     clearOverlay();
   };
 
@@ -129,7 +113,7 @@ export default function VideoStream() {
 };
 
 
-  // Capture frame from <video>
+  // Capture frame from <video> (used for both camera and webcam)
   const captureFrameFromVideo = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -140,47 +124,23 @@ export default function VideoStream() {
     sendFrameToBackend(imageData);
   };
 
-  // Capture frame from <Webcam>
-  const captureFrameFromWebcam = () => {
-    if (webcamActive && webcamRef.current) {
-      const imageSrc = webcamRef.current.getScreenshot();
-      if (imageSrc) sendFrameToBackend(imageSrc);
-    }
-  };
-
   // Frame sending loop
   useEffect(() => {
     let intervalId;
-    if (streaming && cameraActive) {
+    if (streaming && (cameraActive || webcamActive || videoInput)) {
       intervalId = setInterval(captureFrameFromVideo, frameInterval);
     }
     return () => clearInterval(intervalId);
-  }, [streaming, cameraActive]);
-
-  useEffect(() => {
-    let intervalId;
-    if (streaming && videoInput) {
-      intervalId = setInterval(captureFrameFromVideo, frameInterval);
-    }
-    return () => clearInterval(intervalId);
-  }, [streaming, videoInput]);
-
-  useEffect(() => {
-    let intervalId;
-    if (streaming && webcamActive) {
-      intervalId = setInterval(captureFrameFromWebcam, frameInterval);
-    }
-    return () => clearInterval(intervalId);
-  }, [streaming, webcamActive]);
+  }, [streaming, cameraActive, webcamActive, videoInput]);
 
   // Hook up camera button
   useEffect(() => {
     if (cameraBtn.current) {
       cameraBtn.current.onclick = () => {
         if (cameraActive) {
-          stopCamera();
+          stopCameraOrWebcam();
         } else {
-          startCamera();
+          startCameraOrWebcam();
         }
       };
     }
@@ -232,7 +192,7 @@ export default function VideoStream() {
       <div className="max-w-2xl mx-auto mt-5 relative">
         <div className="flex gap-2 align-middle mb-4">
           <Button ref={cameraBtn} className="py-6">
-            {cameraActive ? "Stop Camera" : "Use Phone/Camera"}
+            {webcamActive ? "Stop Webcam" : "Use Webcam"}
           </Button>
           <Input
             className="my-2"
@@ -240,10 +200,50 @@ export default function VideoStream() {
             accept="video/*"
             onChange={(e) => setVideoInput(e.target.files?.[0] || null)}
           />
-          <Button
-            className="py-6"
-            onClick={() => (webcamActive ? stopWebcam() : startWebcam())}
-          >
+        </div>
+
+        {/* Video only (used for both camera and webcam) */}
+        <div className="relative w-[640px] h-[480px] mx-auto">
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            style={{ display: streaming ? "block" : "none" }}
+            className="w-full h-full rounded-md"
+          />
+          {/* Overlay */}
+          <canvas
+            ref={overlayRef}
+            width={640}
+            height={480}
+            className="absolute top-0 left-0 w-full h-full pointer-events-none"
+          />
+        </div>
+
+        {/* Hidden canvas for frame capture */}
+        <canvas
+          ref={canvasRef}
+          width={640}
+          height={480}
+          style={{ display: "none" }}
+        />
+
+        {/* Loading + Results */}
+        {loading && <div className="text-center mt-2">Analyzing...</div>}
+        {analysisResult && !analysisResult.error && (
+          <div className="text-center mt-2 text-sm">
+            Vehicles detected: {analysisResult.detections?.length || 0}
+          </div>
+        )}
+        {analysisResult?.error && (
+          <div className="text-center mt-2 text-red-500">
+            {analysisResult.error}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
             {webcamActive ? "Stop Webcam" : "Use Webcam"}
           </Button>
         </div>
