@@ -5,10 +5,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
 // Fix: Read env variable directly and fallback if not set
-const BACKEND_URL =
-  (typeof window !== "undefined" && process.env.NEXT_PUBLIC_BACKEND_URL
-    ? process.env.NEXT_PUBLIC_BACKEND_URL
-    : "http://127.0.0.1:8000") + "/api/v1/traffic/analyze";
+const BACKEND_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/traffic/analyze`
 
 export default function VideoStream() {
   const cameraBtn = useRef(null);
