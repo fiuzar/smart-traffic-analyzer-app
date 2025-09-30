@@ -8,7 +8,7 @@ import { Input } from "../ui/input";
 const BACKEND_URL =
   (typeof window !== "undefined" && process.env.NEXT_PUBLIC_BACKEND_URL
     ? process.env.NEXT_PUBLIC_BACKEND_URL
-    : "http://127.0.0.1:8000") + "/api/v1/traffic/violations";
+    : "http://127.0.0.1:8000") + "/api/v1/traffic/analyze";
 
 export default function VideoStream() {
   const cameraBtn = useRef(null);
