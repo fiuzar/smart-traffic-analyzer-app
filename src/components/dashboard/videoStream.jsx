@@ -211,21 +211,41 @@ export default function VideoStream() {
           />
         </div>
 
-        {/* Video only (used for both camera and webcam) */}
-        <div className="relative w-[640px] h-[480px] mx-auto">
+        {/* Responsive video/canvas wrapper */}
+        <div
+          className="relative mx-auto"
+          style={{
+            aspectRatio: "4/3",
+            width: "100%",
+            maxWidth: "640px",
+          }}
+        >
           <video
             ref={videoRef}
             autoPlay
             muted
-            style={{ display: streaming ? "block" : "none" }}
-            className="w-full h-full rounded-md"
+            style={{
+              display: streaming ? "block" : "none",
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: "0.5rem",
+            }}
           />
           {/* Overlay */}
           <canvas
             ref={overlayRef}
             width={640}
             height={480}
-            className="absolute top-0 left-0 w-full h-full pointer-events-none"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              borderRadius: "0.5rem",
+            }}
           />
         </div>
 
@@ -251,4 +271,5 @@ export default function VideoStream() {
         )}
       </div>
     </div>
-  )}
+  );
+}
