@@ -5,7 +5,11 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import Webcam from "react-webcam";
 
-const BACKEND_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/traffic/violations`; // <-- change when deployed
+// Fix: Read env variable directly and fallback if not set
+const BACKEND_URL =
+  (typeof window !== "undefined" && process.env.NEXT_PUBLIC_BACKEND_URL
+    ? process.env.NEXT_PUBLIC_BACKEND_URL
+    : "http://127.0.0.1:8000") + "/api/v1/traffic/violations";
 
 export default function VideoStream() {
   const cameraBtn = useRef(null);
