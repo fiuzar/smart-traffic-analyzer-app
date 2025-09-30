@@ -43,7 +43,16 @@ export default function VideoStream() {
   // Camera/Webcam handling (merged)
   const startCameraOrWebcam = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      let stream;
+      try {
+        // Try to use rear camera
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: "environment" } }
+        });
+      } catch (err) {
+        // Fallback to any camera
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      }
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
